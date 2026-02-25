@@ -22,6 +22,9 @@ GS_USB_CES_CANEXT_FD_PRODUCT_ID = 0x606F
 GS_USB_ABE_CANDEBUGGER_FD_VENDOR_ID = 0x16D0
 GS_USB_ABE_CANDEBUGGER_FD_PRODUCT_ID = 0x10B8
 
+GS_USB_CANNECTIVITY_VENDOR_ID = 0x1209
+GS_USB_CANNECTIVITY_PRODUCT_ID = 0xCA01
+
 #gs_usb mode
 GS_CAN_MODE_RESET = 0
 GS_CAN_MODE_START = 1
@@ -221,7 +224,8 @@ class GsUsb:
     is_gs_usb_device = staticmethod(lambda dev : (dev.idVendor == GS_USB_ID_VENDOR and dev.idProduct == GS_USB_ID_PRODUCT)\
             or (dev.idVendor == GS_USB_CANDLELIGHT_VENDOR_ID and dev.idProduct == GS_USB_CANDLELIGHT_PRODUCT_ID) \
             or (dev.idVendor == GS_USB_CES_CANEXT_FD_VENDOR_ID and dev.idProduct == GS_USB_CES_CANEXT_FD_PRODUCT_ID) \
-            or (dev.idVendor == GS_USB_ABE_CANDEBUGGER_FD_VENDOR_ID and dev.idProduct == GS_USB_ABE_CANDEBUGGER_FD_PRODUCT_ID)) \
+            or (dev.idVendor == GS_USB_ABE_CANDEBUGGER_FD_VENDOR_ID and dev.idProduct == GS_USB_ABE_CANDEBUGGER_FD_PRODUCT_ID) \
+            or (dev.idVendor == GS_USB_CANNECTIVITY_VENDOR_ID and dev.idProduct == GS_USB_CANNECTIVITY_PRODUCT_ID)) \
 
     @classmethod
     def scan(cls):
