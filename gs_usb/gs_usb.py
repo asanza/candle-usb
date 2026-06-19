@@ -15,7 +15,8 @@ from .constants import (
     GS_CAN_MODE_NORMAL, GS_CAN_MODE_LISTEN_ONLY, GS_CAN_MODE_LOOP_BACK,
     GS_CAN_MODE_ONE_SHOT, GS_CAN_MODE_HW_TIMESTAMP,
     GS_CAN_MODE_PAD_PKTS_TO_MAX_PKT_SIZE, GS_CAN_MODE_FD,
-    GS_CAN_FEATURE_BT_CONST_EXT,
+    GS_CAN_FEATURE_BT_CONST_EXT, GS_CAN_FEATURE_IDENTIFY,
+    GS_CAN_FEATURE_TERMINATION, GS_CAN_FEATURE_GET_STATE,
 )
 
 # gs_usb VIDs/PIDs (devices currently in the linux kernel driver)
@@ -45,8 +46,11 @@ _GS_USB_BREQ_MODE = 2
 _GS_USB_BREQ_BERR = 3
 _GS_USB_BREQ_BT_CONST = 4
 _GS_USB_BREQ_DEVICE_CONFIG = 5
+_GS_USB_BREQ_IDENTIFY = 7
 _GS_USB_BREQ_DATA_BITTIMING = 10
 _GS_USB_BREQ_BT_CONST_EXT = 11
+_GS_USB_BREQ_SET_TERMINATION = 12
+_GS_USB_BREQ_GET_TERMINATION = 13
 _GS_USB_BREQ_GET_STATE = 14
 
 
@@ -284,7 +288,6 @@ class GsUsb:
         Query the CAN controller state (error counters, bus-off, etc.).
         Returns a DeviceState, or None if the device does not support this request.
         """
-        from .constants import GS_CAN_FEATURE_GET_STATE
         if not (self.device_capability.feature & GS_CAN_FEATURE_GET_STATE):
             return None
         try:
@@ -292,6 +295,41 @@ class GsUsb:
             return DeviceState.unpack(data)
         except usb.core.USBError:
             return None
+
+    def identify(self, on):
+        r"""
+        Turn the device identify LED on or off.
+        Returns True on success, False if the device does not support identify.
+        """
+        if not (self.device_capability.feature & GS_CAN_FEATURE_IDENTIFY):
+            return False
+        mode = 1 if on else 0
+        self.gs_usb.ctrl_transfer(0x41, _GS_USB_BREQ_IDENTIFY, 0, 0, pack("<I", mode))
+        return True
+
+    def get_termination(self):
+        r"""
+        Read the built-in bus termination resistor state.
+        Returns True if termination is active, False if off, None if unsupported.
+        """
+        if not (self.device_capability.feature & GS_CAN_FEATURE_TERMINATION):
+            return None
+        try:
+            data = self.gs_usb.ctrl_transfer(0xC1, _GS_USB_BREQ_GET_TERMINATION, 0, 0, 4)
+            return unpack("<I", data)[0] != 0
+        except usb.core.USBError:
+            return None
+
+    def set_termination(self, on):
+        r"""
+        Enable or disable the built-in bus termination resistor.
+        Returns True on success, False if the device does not support termination.
+        """
+        if not (self.device_capability.feature & GS_CAN_FEATURE_TERMINATION):
+            return False
+        state = 1 if on else 0
+        self.gs_usb.ctrl_transfer(0x41, _GS_USB_BREQ_SET_TERMINATION, 0, 0, pack("<I", state))
+        return True
 
     def __str__(self):
         try:
