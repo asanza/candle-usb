@@ -5,7 +5,7 @@ from usb.backend import libusb1
 import usb.core
 import usb.util
 
-from .gs_usb_structures import DeviceMode, DeviceBitTiming, DeviceInfo, DeviceCapability, DeviceBtConstExtended
+from .gs_usb_structures import DeviceMode, DeviceBitTiming, DeviceInfo, DeviceCapability, DeviceBtConstExtended, DeviceState
 from .gs_usb_frame import (
     GsUsbFrame,
     GS_USB_FRAME_SIZE, GS_USB_FRAME_SIZE_HW_TIMESTAMP,
@@ -47,6 +47,7 @@ _GS_USB_BREQ_BT_CONST = 4
 _GS_USB_BREQ_DEVICE_CONFIG = 5
 _GS_USB_BREQ_DATA_BITTIMING = 10
 _GS_USB_BREQ_BT_CONST_EXT = 11
+_GS_USB_BREQ_GET_STATE = 14
 
 
 class GsUsb:
@@ -204,11 +205,15 @@ class GsUsb:
 
     def send(self, frame):
         r"""
-        Send frame
+        Send frame.
         :param frame: GsUsbFrame
+        :return: True on success, False if the device rejected the write (e.g. bus-off)
         """
         # TX frames never carry a hardware timestamp (that field is RX-only, added by the device)
-        self.gs_usb.write(0x02, frame.pack(hw_timestamp=False))
+        try:
+            self.gs_usb.write(0x02, frame.pack(hw_timestamp=False))
+        except usb.core.USBTimeoutError:
+            return False
         return True
 
     def read(self, frame, timeout_ms):
@@ -273,6 +278,20 @@ class GsUsb:
             else:
                 self.capability = cap
         return self.capability
+
+    def get_state(self):
+        r"""
+        Query the CAN controller state (error counters, bus-off, etc.).
+        Returns a DeviceState, or None if the device does not support this request.
+        """
+        from .constants import GS_CAN_FEATURE_GET_STATE
+        if not (self.device_capability.feature & GS_CAN_FEATURE_GET_STATE):
+            return None
+        try:
+            data = self.gs_usb.ctrl_transfer(0xC1, _GS_USB_BREQ_GET_STATE, 0, 0, 12)
+            return DeviceState.unpack(data)
+        except usb.core.USBError:
+            return None
 
     def __str__(self):
         try:

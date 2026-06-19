@@ -133,3 +133,43 @@ class DeviceBtConstExtended:
     def unpack(data: bytes):
         unpacked_data = unpack("<18I", data)
         return DeviceBtConstExtended(*unpacked_data)
+
+
+class DeviceState:
+    ERROR_ACTIVE  = 0
+    ERROR_WARNING = 1
+    ERROR_PASSIVE = 2
+    BUS_OFF       = 3
+    STOPPED       = 4
+    SLEEPING      = 5
+
+    _NAMES = {
+        0: "ERROR-ACTIVE",
+        1: "ERROR-WARNING",
+        2: "ERROR-PASSIVE",
+        3: "BUS-OFF",
+        4: "STOPPED",
+        5: "SLEEPING",
+    }
+
+    def __init__(self, state, rxerr, txerr):
+        self.state = state
+        self.rxerr = rxerr
+        self.txerr = txerr
+
+    @property
+    def name(self):
+        return self._NAMES.get(self.state, "UNKNOWN({})".format(self.state))
+
+    @property
+    def is_bus_off(self):
+        return self.state == self.BUS_OFF
+
+    def __str__(self):
+        return "State: {}  RX errors: {}  TX errors: {}".format(
+            self.name, self.rxerr, self.txerr)
+
+    @staticmethod
+    def unpack(data: bytes):
+        state, rxerr, txerr = unpack("<3I", data)
+        return DeviceState(state, rxerr, txerr)

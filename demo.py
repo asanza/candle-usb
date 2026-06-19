@@ -64,6 +64,12 @@ def main():
 
             if dev.send(frames[n]):
                 print("TX  {}".format(frames[n]))
+            else:
+                state = dev.get_state()
+                if state:
+                    print("TX FAILED — device state: {}".format(state))
+                else:
+                    print("TX FAILED")
 
 
 if __name__ == "__main__":
