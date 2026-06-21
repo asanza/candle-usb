@@ -92,10 +92,17 @@ The workflow uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publis
 - Workflow: `publish.yml`
 - Environment: `pypi`
 
-## Credits
+## Fork notice
 
-Based on [gs_usb](https://github.com/jxltom/gs_usb) by jxltom. Extended with CAN FD support, correct flags-based frame parsing, hardware timestamp handling, and the `pycandump` CLI.
+This is a fork of [gs_usb](https://github.com/jxltom/gs_usb) by jxltom, extended with:
+
+- Correct CAN FD frame parsing — dispatch on `GS_CAN_FLAG_FD` in the frame header (matching the Linux kernel driver) instead of packet size, which breaks when `GS_CAN_MODE_PAD_PKTS_TO_MAX_PKT_SIZE` is active
+- Hardware timestamp support (`GS_CAN_MODE_HW_TIMESTAMP`)
+- `set_data_bitrate()` and full CAN FD mode setup
+- `pycandump` CLI monitor
+- Identify LED and bus termination control
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).  
+Original work © 2020 jxltom. Modifications © 2024 Diego Asanza.
