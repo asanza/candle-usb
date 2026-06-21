@@ -10,6 +10,15 @@ pip install candle-usb
 
 Requires [libusb](https://libusb.info). On Linux install `libusb-1.0-0` and add a udev rule; on Windows use [Zadig](https://zadig.akeo.ie) to bind WinUSB to the device.
 
+## Compatible firmware
+
+This library works with any adapter running the gs_usb USB protocol:
+
+- **[CANnectivity](https://github.com/CANnectivity/cannectivity)** — open-source Zephyr-based firmware for CAN / CAN FD adapters. Recommended for CAN FD support.
+- **[candleLight](https://github.com/candle-usb/candleLight_fw)** — popular STM32-based firmware for classic CAN adapters (CANable, canable-pro, etc.)
+
+For CAN FD (`--data-bitrate`) the adapter must run CANnectivity or another gs_usb firmware with FD capability.
+
 ## pycandump
 
 A `candump`-style live monitor is included and available on the PATH after install:
@@ -105,4 +114,4 @@ This is a fork of [gs_usb](https://github.com/jxltom/gs_usb) by jxltom, extended
 ## License
 
 MIT — see [LICENSE](LICENSE).  
-Original work © 2020 jxltom. Modifications © 2024 Diego Asanza.
+Original work © 2020 jxltom. Modifications © 2026 Diego Asanza.
