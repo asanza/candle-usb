@@ -4,7 +4,7 @@ from .constants import (
     CANFD_MAX_DLEN, CANFD_MAX_DLC, CANFD_DLC_TO_LEN,
     GS_CAN_FLAG_FD, GS_CAN_FLAG_BRS, GS_CAN_FLAG_ESI,
 )
-from struct import *
+from struct import pack, unpack
 
 # gs_usb general
 GS_USB_ECHO_ID = 0
@@ -129,26 +129,16 @@ class GsUsbFrame:
 
     @staticmethod
     def unpack_into(frame, data: bytes, hw_timestamp):
-        data_len = len(data)
-        if data_len in (GS_USB_FRAME_SIZE_FD, GS_USB_FRAME_SIZE_FD_HW_TIMESTAMP):
-            if hw_timestamp:
-                (
-                    frame.echo_id, frame.can_id, frame.can_dlc, frame.channel,
-                    frame.flags, frame.reserved, *frame.data, frame.timestamp_us,
-                ) = unpack("<2I4B64BI", data)
-            else:
-                (
-                    frame.echo_id, frame.can_id, frame.can_dlc, frame.channel,
-                    frame.flags, frame.reserved, *frame.data,
-                ) = unpack("<2I4B64B", data)
+        # Parse header first, then branch on flags — not packet size.
+        # Size-based dispatch breaks when GS_CAN_MODE_PAD_PKTS_TO_MAX_PKT_SIZE
+        # is active: classic frames arrive padded to 80 bytes, causing the
+        # timestamp to be read from zero-padding at offset 76 instead of
+        # the real timestamp at offset 20.
+        frame.echo_id, frame.can_id, frame.can_dlc, frame.channel, frame.flags, frame.reserved = unpack("<2I4B", data[:12])
+
+        if frame.flags & GS_CAN_FLAG_FD:
+            frame.data = list(unpack("<64B", data[12:76]))
+            frame.timestamp_us = unpack("<I", data[76:80])[0] if hw_timestamp else 0
         else:
-            if hw_timestamp:
-                (
-                    frame.echo_id, frame.can_id, frame.can_dlc, frame.channel,
-                    frame.flags, frame.reserved, *frame.data, frame.timestamp_us,
-                ) = unpack("<2I12BI", data)
-            else:
-                (
-                    frame.echo_id, frame.can_id, frame.can_dlc, frame.channel,
-                    frame.flags, frame.reserved, *frame.data,
-                ) = unpack("<2I12B", data)
+            frame.data = list(unpack("<8B", data[12:20]))
+            frame.timestamp_us = unpack("<I", data[20:24])[0] if hw_timestamp else 0

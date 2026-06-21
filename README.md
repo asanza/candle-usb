@@ -1,81 +1,101 @@
-# gs_usb
+# candle-usb
 
-Python Windows/Linux/Mac CAN driver based on usbfs or WinUSB WCID for Geschwister Schneider USB/CAN devices, candleLight USB CAN interfaces, CAN Debugger devices and other interfaces utilising the gs_usb driver.
+Python CAN / CAN FD driver for [candleLight](https://github.com/candle-usb/candleLight_fw) USB adapters and Geschwister Schneider gs_usb devices — Windows, Linux, macOS.
 
-## Getting Started
+## Install
 
-Install by ```pip install gs_usb```
+```
+pip install candle-usb
+```
 
-Below is a basic demo for CAN message sending and receiving.
+Requires [libusb](https://libusb.info). On Linux install `libusb-1.0-0` and add a udev rule; on Windows use [Zadig](https://zadig.akeo.ie) to bind WinUSB to the device.
+
+## pycandump
+
+A `candump`-style live monitor is included and available on the PATH after install:
+
+```
+pycandump                                      # classic CAN, 500 kbps, listen-only
+pycandump --bitrate 250000
+pycandump --data-bitrate 1000000               # enables CAN FD mode
+pycandump --active                             # required when adapter is sole receiver
+pycandump --filter 0x100:0x7FF
+pycandump --fd-only
+pycandump --log trace.log
+pycandump --device 6:14                        # pick a specific USB device
+```
+
+> **Note on `--active`:** in listen-only mode the adapter sends no ACK bits. If it is
+> the only receiver on the bus the sender will retransmit the same frame indefinitely.
+> Pass `--active` whenever you are the sole node.
+
+## API usage
+
+### Classic CAN
 
 ```python
-import time
+from gs_usb.gs_usb import GsUsb
+from gs_usb.gs_usb_frame import GsUsbFrame
+from gs_usb.constants import CAN_EFF_FLAG
 
+devs = GsUsb.scan()
+dev  = devs[0]
+
+dev.set_bitrate(500000)
+dev.start()
+
+frame = GsUsbFrame(can_id=0x7FF, data=b"\x01\x02\x03")
+dev.send(frame)
+
+rx = GsUsbFrame()
+if dev.read(rx, timeout_ms=100):
+    print(rx)
+
+dev.stop()
+```
+
+### CAN FD
+
+```python
 from gs_usb.gs_usb import GsUsb
 from gs_usb.gs_usb_frame import GsUsbFrame
 from gs_usb.constants import (
-    CAN_EFF_FLAG,
-    CAN_ERR_FLAG,
-    CAN_RTR_FLAG,
+    GS_CAN_MODE_FD, GS_CAN_MODE_HW_TIMESTAMP,
+    GS_CAN_FEATURE_FD, GS_CAN_FEATURE_HW_TIMESTAMP,
 )
 
+dev = GsUsb.scan()[0]
+dev.set_bitrate(250000)
+dev.set_data_bitrate(1000000)
+dev.start(GS_CAN_MODE_FD | GS_CAN_MODE_HW_TIMESTAMP)
 
-def main():
-    # Find our device
-    devs = GsUsb.scan()
-    if len(devs) == 0:
-        print("Can not find gs_usb device")
-        return
-    dev = devs[0]
+frame = GsUsbFrame()
+if dev.read(frame, timeout_ms=200):
+    print(frame)          # shows FD / BRS / ESI flags automatically
 
-    # Configuration
-    if not dev.set_bitrate(250000):
-        print("Can not set bitrate for gs_usb")
-        return
-
-    # Start device
-    dev.start()
-
-    # Prepare frames
-    data = b"\x12\x34\x56\x78\x9A\xBC\xDE\xF0"
-    sff_frame = GsUsbFrame(can_id=0x7FF, data=data)
-    sff_none_data_frame = GsUsbFrame(can_id=0x7FF)
-    err_frame = GsUsbFrame(can_id=0x7FF | CAN_ERR_FLAG, data=data)
-    eff_frame = GsUsbFrame(can_id=0x12345678 | CAN_EFF_FLAG, data=data)
-    eff_none_data_frame = GsUsbFrame(can_id=0x12345678 | CAN_EFF_FLAG)
-    rtr_frame = GsUsbFrame(can_id=0x7FF | CAN_RTR_FLAG)
-    rtr_with_eid_frame = GsUsbFrame(can_id=0x12345678 | CAN_RTR_FLAG | CAN_EFF_FLAG)
-    rtr_with_data_frame = GsUsbFrame(can_id=0x7FF | CAN_RTR_FLAG, data=data)
-    frames = [
-        sff_frame,
-        sff_none_data_frame,
-        err_frame,
-        eff_frame,
-        eff_none_data_frame,
-        rtr_frame,
-        rtr_with_eid_frame,
-        rtr_with_data_frame,
-    ]
-
-    # Read all the time and send message in each second
-    end_time, n = time.time() + 1, -1
-    while True:
-        iframe = GsUsbFrame()
-        if dev.read(iframe, 1):
-            print("RX  {}".format(iframe))
-
-        if time.time() - end_time >= 0:
-            end_time = time.time() + 1
-            n += 1
-            n %= len(frames)
-
-            if dev.send(frames[n]):
-                print("TX  {}".format(frames[n]))
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        pass
+dev.stop()
 ```
+
+## Publishing a new release
+
+Push a version tag and GitHub Actions builds and publishes to PyPI automatically:
+
+```
+git tag v0.4.0
+git push origin v0.4.0
+```
+
+The workflow uses [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC — no API token needed). On first use, configure the publisher on PyPI under the project settings:
+- Publisher: GitHub Actions
+- Owner: `diegoasanza`
+- Repository: `candle-usb`
+- Workflow: `publish.yml`
+- Environment: `pypi`
+
+## Credits
+
+Based on [gs_usb](https://github.com/jxltom/gs_usb) by jxltom. Extended with CAN FD support, correct flags-based frame parsing, hardware timestamp handling, and the `pycandump` CLI.
+
+## License
+
+MIT
