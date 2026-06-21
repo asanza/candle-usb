@@ -6,8 +6,8 @@ Run with no arguments to use the first found device.
 """
 import time
 
-from gs_usb.gs_usb import GsUsb
-from gs_usb.constants import GS_CAN_FEATURE_IDENTIFY, GS_CAN_FEATURE_TERMINATION
+from candle_usb.gs_usb import GsUsb
+from candle_usb.constants import GS_CAN_FEATURE_IDENTIFY, GS_CAN_FEATURE_TERMINATION
 
 
 def check(label, result, expected=True):

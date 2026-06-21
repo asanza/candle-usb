@@ -11,9 +11,9 @@ import queue
 import threading
 from struct import unpack
 
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame, GS_USB_FRAME_SIZE_FD_HW_TIMESTAMP
-from gs_usb.constants import (
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame, GS_USB_FRAME_SIZE_FD_HW_TIMESTAMP
+from candle_usb.constants import (
     GS_CAN_MODE_HW_TIMESTAMP, GS_CAN_MODE_FD,
     GS_CAN_FEATURE_FD, GS_CAN_FEATURE_HW_TIMESTAMP, CAN_ERR_FLAG,
 )

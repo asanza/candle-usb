@@ -13,9 +13,9 @@ Defaults: 500000 nominal, 2000000 data
 import sys
 import time
 
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame
-from gs_usb.constants import (
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame
+from candle_usb.constants import (
     CAN_EFF_FLAG,
     GS_CAN_MODE_FD, GS_CAN_MODE_LOOP_BACK, GS_CAN_MODE_HW_TIMESTAMP,
     GS_CAN_FEATURE_FD,

@@ -20,9 +20,9 @@ import sys
 import time
 from datetime import datetime
 
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame
-from gs_usb.constants import (
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame
+from candle_usb.constants import (
     GS_CAN_MODE_LISTEN_ONLY,
     GS_CAN_MODE_HW_TIMESTAMP,
     GS_CAN_MODE_FD,

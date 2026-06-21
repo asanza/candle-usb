@@ -34,9 +34,9 @@ pycandump --device 6:14                        # pick a specific USB device
 ### Classic CAN
 
 ```python
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame
-from gs_usb.constants import CAN_EFF_FLAG
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame
+from candle_usb.constants import CAN_EFF_FLAG
 
 devs = GsUsb.scan()
 dev  = devs[0]
@@ -57,9 +57,9 @@ dev.stop()
 ### CAN FD
 
 ```python
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame
-from gs_usb.constants import (
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame
+from candle_usb.constants import (
     GS_CAN_MODE_FD, GS_CAN_MODE_HW_TIMESTAMP,
     GS_CAN_FEATURE_FD, GS_CAN_FEATURE_HW_TIMESTAMP,
 )

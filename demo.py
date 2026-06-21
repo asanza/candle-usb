@@ -1,8 +1,8 @@
 import time
 
-from gs_usb.gs_usb import GsUsb
-from gs_usb.gs_usb_frame import GsUsbFrame
-from gs_usb.constants import (
+from candle_usb.gs_usb import GsUsb
+from candle_usb.gs_usb_frame import GsUsbFrame
+from candle_usb.constants import (
     CAN_EFF_FLAG,
     CAN_ERR_FLAG,
     CAN_RTR_FLAG,

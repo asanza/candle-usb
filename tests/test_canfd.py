@@ -2,14 +2,14 @@
 import pytest
 from struct import pack, unpack
 
-from gs_usb.gs_usb_frame import (
+from candle_usb.gs_usb_frame import (
     GsUsbFrame,
     GS_USB_FRAME_SIZE, GS_USB_FRAME_SIZE_HW_TIMESTAMP,
     GS_USB_FRAME_SIZE_FD, GS_USB_FRAME_SIZE_FD_HW_TIMESTAMP,
     GS_USB_ECHO_ID,
 )
-from gs_usb.gs_usb_structures import DeviceBtConstExtended
-from gs_usb.constants import (
+from candle_usb.gs_usb_structures import DeviceBtConstExtended
+from candle_usb.constants import (
     CAN_EFF_FLAG, CAN_RTR_FLAG, CAN_ERR_FLAG,
     CANFD_DLC_TO_LEN, CANFD_MAX_DLC, CANFD_MAX_DLEN,
     GS_CAN_FLAG_FD, GS_CAN_FLAG_BRS, GS_CAN_FLAG_ESI,

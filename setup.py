@@ -19,7 +19,7 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 about = {}
-with open(os.path.join(here, "gs_usb", "__version__.py")) as f:
+with open(os.path.join(here, "candle_usb", "__version__.py")) as f:
     exec(f.read(), about)
 
 setup(
@@ -37,7 +37,7 @@ setup(
     license="MIT",
     entry_points={
         "console_scripts": [
-            "pycandump=gs_usb.pycandump:main",
+            "pycandump=candle_usb.pycandump:main",
         ],
     },
     classifiers=[
